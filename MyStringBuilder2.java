@@ -28,10 +28,10 @@ public class MyStringBuilder2
 	// help with your implementation of the public methods.
 
 	// Create a new MyStringBuilder initialized with the chars in String s
-	public MyStringBuilder(String s)
+	public MyStringBuilder2(String s)
 	{
 		if (s != null && s.length() > 0)
-            makeBuilder(s, 0);
+            makeBuilderString(s, 0);
 		else  // no String so initialize empty MyStringBuilder2
 		{
 			length = 0;
@@ -40,7 +40,7 @@ public class MyStringBuilder2
 		}
 	}
 	
-	private void makeBuilder(String s, int pos)
+	private void makeBuilderString(String s, int pos)
 	{
 		// Recursive case – we have not finished going through the String
 		if (pos < s.length()-1)
@@ -50,7 +50,7 @@ public class MyStringBuilder2
             // the front node, and it enables us to avoid having to make a
             // special test for the front node.  However, many of your
             // methods will proceed in the normal front to back way.
-            makeBuilder(s, pos+1);
+            makeBuilderString(s, pos+1);
             firstC = new CNode(s.charAt(pos), firstC);
             length++;
 		}
@@ -71,44 +71,183 @@ public class MyStringBuilder2
 	}
 
 	// Create a new MyStringBuilder initialized with the chars in array s
-	public MyStringBuilder(char [] s)
+	public MyStringBuilder2(char [] s)
 	{
+		if (s != null && s.length > 0)
+            makeBuilderCharArray(s, 0);
+		else  // no String so initialize empty MyStringBuilder2
+		{
+			length = 0;
+            firstC = null;
+            lastC = null;
+		}
+	}
+	
+	private void makeBuilderCharArray(char [] s, int pos)
+	{
+		// Recursive case – we have not finished going through the String
+		if (pos < s.length-1)
+		{
+            // Note how this is done – we make the recursive call FIRST, then
+            // add the node before it.  In this way the LAST node we add is
+            // the front node, and it enables us to avoid having to make a
+            // special test for the front node.  However, many of your
+            // methods will proceed in the normal front to back way.
+            makeBuilderCharArray(s, pos+1);
+            firstC = new CNode(s[pos], firstC);
+            length++;
+		}
+		else if (pos == s.length-1) // Special case for last char in String
+		{                             // This is needed since lastC must be
+                                    // set to point to this node
+            firstC = new CNode(s[pos]);
+            lastC = firstC;
+            length = 1;
+		}
+				// This case should never be reached, due to the way the
+		else	// constructor is set up.  However, I included it as a
+		{		// safeguard (in case some other method calls this one)
+            length = 0;
+            firstC = null;
+            lastC = null;
+		}
 	}
 
 	// Create a new empty MyStringBuilder
-	public MyStringBuilder()
+	public MyStringBuilder2()
 	{
+		firstC = null;
+		lastC = null;
+		length = 0;
 	}
 
 	// Append MyStringBuilder b to the end of the current MyStringBuilder, and
 	// return the current MyStringBuilder.  Be careful for special cases!
-	public MyStringBuilder append(MyStringBuilder b)
+	public MyStringBuilder2 append(MyStringBuilder2 b)
 	{
+		if (b == null || b.length() == 0) // Special case for empty String
+		{					 			  // or null reference
+			return this;
+		}
+		else
+		{			
+			appendMSB(b.firstC, lastC);
+		}
+		length += b.length();
+		return this;
+	}
+	
+	private void appendMSB(CNode front, CNode end){
+		// Recursive case – we have not finished going through the String
+		if (front != null)
+		{
+			CNode temp = new CNode(front.data);
+			end.next = temp;
+            appendMSB(front.next, temp);
+		}
+		else
+		{
+            lastC = end;
+		}
 	}
 
 
 	// Append String s to the end of the current MyStringBuilder, and return
 	// the current MyStringBuilder.  Be careful for special cases!
-	public MyStringBuilder append(String s)
+	public MyStringBuilder2 append(String s)
 	{
+		if (s == null || s.length() == 0) // Special case for empty String
+		{					 			  // or null reference
+			return this;
+		}
+		else if (firstC == null)
+		{
+			makeBuilderString(s,0);
+		}
+		else
+		{			
+			appendString(s, 0, lastC);
+		}
+		length += s.length();
+		return this;
+	}
+	
+	private void appendString(String s, int pos, CNode end){
+		// Recursive case – we have not finished going through the String
+		if (pos < s.length()-1)
+		{
+			CNode temp = new CNode(s.charAt(pos));
+			end.next = temp;
+            appendString(s, pos+1, temp);
+
+		}
+		else
+		{
+            CNode temp = new CNode(s.charAt(pos));
+			end.next = temp;
+            lastC = temp;
+		}
 	}
 
 	// Append char array c to the end of the current MyStringBuilder, and
 	// return the current MyStringBuilder.  Be careful for special cases!
-	public MyStringBuilder append(char [] c)
+	public MyStringBuilder2 append(char [] c)
 	{
+		if (c == null || c.length == 0) // Special case for empty String
+		{					 			  // or null reference
+			return this;
+		}
+		else
+		{			
+			appendCharArray(c, 0, lastC);
+		}
+		length += c.length;
+		return this;
+	}
+	
+	private void appendCharArray(char [] s, int pos, CNode end){
+		// Recursive case – we have not finished going through the String
+		if (pos < s.length-1)
+		{
+			CNode temp = new CNode(s[pos]);
+			end.next = temp;
+            appendCharArray(s, pos+1, temp);
+
+		}
+		else
+		{
+            CNode temp = new CNode(s[pos]);
+			end.next = temp;
+            lastC = temp;
+		}
 	}
 
 	// Append char c to the end of the current MyStringBuilder, and
 	// return the current MyStringBuilder.  Be careful for special cases!
-	public MyStringBuilder append(char c)
+	public MyStringBuilder2 append(char c)
 	{
+		return this;
+	}
+	
+	private void appendChar(CNode front, CNode end){
+		// Recursive case – we have not finished going through the String
+		if (front != null)
+		{
+			CNode temp = new CNode(front.data);
+			end.next = temp;
+            appendMSB(front.next, temp);
+		}
+		else
+		{
+            lastC = end;
+		}
 	}
 
 	// Return the character at location "index" in the current MyStringBuilder.
 	// If index is invalid, throw an IndexOutOfBoundsException.
 	public char charAt(int index)
 	{
+		return 'c';
 	}
 
 	// Delete the characters from index "start" to index "end" - 1 in the
@@ -117,16 +256,18 @@ public class MyStringBuilder2
 	// MyStringBuilder as is).  If "end" is past the end of the MyStringBuilder, 
 	// only remove up until the end of the MyStringBuilder. Be careful for 
 	// special cases!
-	public MyStringBuilder delete(int start, int end)
+	public MyStringBuilder2 delete(int start, int end)
 	{
+		return this;
 	}
 
 	// Delete the character at location "index" from the current
 	// MyStringBuilder and return the current MyStringBuilder.  If "index" is
 	// invalid, do nothing (just return the MyStringBuilder as is).
 	// Be careful for special cases!
-	public MyStringBuilder deleteCharAt(int index)
+	public MyStringBuilder2 deleteCharAt(int index)
 	{
+		return this;
 	}
 
 	// Find and return the index within the current MyStringBuilder where
@@ -136,29 +277,33 @@ public class MyStringBuilder2
 	// what you need to do for this method before implementing it.
 	public int indexOf(String str)
 	{
+		return -1;
 	}
 
 	// Insert String str into the current MyStringBuilder starting at index
 	// "offset" and return the current MyStringBuilder.  if "offset" == 
 	// length, this is the same as append.  If "offset" is invalid
 	// do nothing.
-	public MyStringBuilder insert(int offset, String str)
+	public MyStringBuilder2 insert(int offset, String str)
 	{
+		return this;
 	}
 
 	// Insert character c into the current MyStringBuilder at index
 	// "offset" and return the current MyStringBuilder.  If "offset" ==
 	// length, this is the same as append.  If "offset" is invalid, 
 	// do nothing.
-	public MyStringBuilder insert(int offset, char c)
+	public MyStringBuilder2 insert(int offset, char c)
 	{
+		return this;
 	}
 
 	// Insert char array c into the current MyStringBuilder starting at index
 	// index "offset" and return the current MyStringBuilder.  If "offset" is
 	// invalid, do nothing.
-	public MyStringBuilder insert(int offset, char [] c)
+	public MyStringBuilder2 insert(int offset, char [] c)
 	{
+		return this;
 	}
 
 	// Return the length of the current MyStringBuilder
@@ -174,14 +319,16 @@ public class MyStringBuilder2
 	// MyStringBuilder.  If "start" is invalid or "end" <= "start", do nothing.
 	// If "end" is past the end of the MyStringBuilder, only delete until the
 	// end of the MyStringBuilder, then insert.
-	public MyStringBuilder replace(int start, int end, String str)
+	public MyStringBuilder2 replace(int start, int end, String str)
 	{
+		return this;
 	}
 
 	// Return as a String the substring of characters from index "start" to
 	// index "end" - 1 within the current MyStringBuilder
 	public String substring(int start, int end)
 	{
+		return "this";
 	}
 
 	// Return the entire contents of the current MyStringBuilder as a String
