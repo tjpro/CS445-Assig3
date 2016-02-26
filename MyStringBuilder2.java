@@ -380,7 +380,28 @@ public class MyStringBuilder2
 	// what you need to do for this method before implementing it.
 	public int indexOf(String str)
 	{
-		return -1;
+		return indexOfR(0, 0, firstC, str, false);
+	}
+	
+	private int indexOfR(int count, int s, CNode node, String str, boolean found){
+		if(node == null && found == false){
+			return -1;
+		}
+		else if(node == null || found == true){
+			return count;
+		}
+		else if(s<=str.length()-1 && str.charAt(s) == node.data)
+		{
+			if(s==str.length()-1){
+				count-=str.length();
+				found = true;
+			}
+			return indexOfR(count + 1, s + 1, node.next, str, found);
+		}
+		else
+		{
+			return indexOfR(count + 1, 0, node.next, str, found);
+		}
 	}
 
 	// Insert String str into the current MyStringBuilder starting at index
