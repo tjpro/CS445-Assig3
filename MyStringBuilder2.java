@@ -226,9 +226,27 @@ public class MyStringBuilder2
 	// return the current MyStringBuilder.  Be careful for special cases!
 	public MyStringBuilder2 append(char c)
 	{
+		if (c == '\u0000'){//checks if char is 	empty				 			  
+			return this;
+		}
+		else		//****************************LEGAL?
+		{
+			if(this.firstC == null){
+				this.firstC = new CNode(c);
+				this.lastC = this.firstC;
+			}
+			
+			CNode currNode = lastC;
+			CNode newNode = new CNode(c);
+			currNode.next = newNode;
+			currNode = newNode;
+			lastC = currNode;
+		}	
+		length++;
 		return this;
 	}
 	
+	/*																				Not finished, but not needed for now
 	private void appendChar(CNode front, CNode end){
 		// Recursive case – we have not finished going through the String
 		if (front != null)
@@ -237,17 +255,39 @@ public class MyStringBuilder2
 			end.next = temp;
             appendMSB(front.next, temp);
 		}
-		else
+		else																	
 		{
-            lastC = end;
+			CNode currNode = lastC;
+			CNode newNode = new CNode(c);
+			currNode.next = newNode;
+			currNode = newNode;
+			length++;
+			lastC = currNode;	
 		}
 	}
+	*/
 
 	// Return the character at location "index" in the current MyStringBuilder.
 	// If index is invalid, throw an IndexOutOfBoundsException.
 	public char charAt(int index)
 	{
-		return 'c';
+		if(index<0||index>length){
+			throw new IndexOutOfBoundsException();//incase index isn't valid
+		}
+		else{
+			return charAtR(0,index,firstC);
+		}
+	}
+	
+	private char charAtR(int s, int index, CNode node){
+		if (s == index)
+		{
+			return node.data;
+		}
+		else
+		{
+			return charAtR(s + 1,index,node.next);
+		}
 	}
 
 	// Delete the characters from index "start" to index "end" - 1 in the
@@ -258,7 +298,54 @@ public class MyStringBuilder2
 	// special cases!
 	public MyStringBuilder2 delete(int start, int end)
 	{
+		if(start < 0||start > length){//Special case 
+			return this;
+		}
+		else if(start == 0 && end == 1){//just delete the first char
+			firstC = firstC.next;
+			length--;
+			return this;
+		}
+		else if(start >= end){ // special case
+			return this;
+		}
+		else if(start == 0 && end >= length){//delete the whole thing
+			firstC=null;
+			lastC = null;
+			length = 0;
+
+		}
+		else if(start > 0 && end >= length){
+			CNode temp = getNodeAt(0, start - 1, firstC);
+			temp.next = null;
+			length = start;
+		}
+		else if(start == 0 && end < length){
+			firstC = getNodeAt(0, end, firstC);
+			length -= end;
+		}
+		else{
+			CNode front = firstC;
+			deleteR(0, start, end, front, firstC);
+			length = length-end+start;
+		}
 		return this;
+	}
+	
+	private void deleteR(int s, int start, int end, CNode front, CNode node){
+		if(s != start - 1 && s != end)
+		{
+			deleteR(s + 1, start, end, front, node.next);
+		}
+		else if (s == start - 1)
+		{
+			front = node;
+			deleteR(s + 1, start, end, front, node.next);
+		}
+		else
+		{
+			front.next = node;
+		}
 	}
 
 	// Delete the character at location "index" from the current
@@ -267,6 +354,22 @@ public class MyStringBuilder2
 	// Be careful for special cases!
 	public MyStringBuilder2 deleteCharAt(int index)
 	{
+		if(index<0||index>length){//special case
+			return this;
+		}
+		else if(index == 0){//front char
+			firstC = firstC.next;
+		}
+		else if(index == length-1){//just delete end
+			lastC = getNodeAt(0, index-1, firstC);
+			lastC.next=null;
+		}
+		else{//normal case
+			int i = 0;
+			CNode currNode = getNodeAt(0, index-1, firstC);
+			currNode.next = currNode.next.next;
+		}
+		length--;
 		return this;
 	}
 
@@ -286,7 +389,51 @@ public class MyStringBuilder2
 	// do nothing.
 	public MyStringBuilder2 insert(int offset, String str)
 	{
+		if(offset<0||offset>length){
+			return this;
+		}
+		
+		else if(offset == length){//just the append case
+			appendString(str, 0, lastC);
+		}
+		
+		else if(offset == 0){//put at front
+			int lHolder = length;
+			CNode tempNode = firstC;
+			CNode tempNode2 = lastC;
+			makeBuilderString(str, 0);
+			lastC.next = tempNode;
+			lastC = tempNode2;
+			length = lHolder;
+		}
+		
+		else{//normal case
+			CNode lastHolder = lastC;
+			CNode tempNode = getNodeAt(0, offset - 1, firstC);
+			CNode contNode = tempNode.next;
+			appendString(str, 0, tempNode);
+			lastC.next = contNode;
+			lastC = lastHolder;
+		}
+		length+=str.length();
 		return this;
+	}
+	
+	private void insertString(String s, int pos, CNode end){
+		// Recursive case – we have not finished going through the String
+		if (pos < s.length()-1)
+		{
+			CNode temp = new CNode(s.charAt(pos));
+			end.next = temp;
+            insertString(s, pos+1, temp);
+
+		}
+		else
+		{
+            CNode temp = new CNode(s.charAt(pos));
+			end.next = temp;
+            lastC = temp;
+		}
 	}
 
 	// Insert character c into the current MyStringBuilder at index
@@ -295,6 +442,28 @@ public class MyStringBuilder2
 	// do nothing.
 	public MyStringBuilder2 insert(int offset, char c)
 	{
+		if(offset<0||offset>length){
+			return this;
+		}
+		
+		else if(offset == length){//just the append case
+			CNode temp = new CNode(c);
+			lastC.next = temp;
+			lastC = temp;
+		}
+		
+		else if(offset == 0){//put at front
+			CNode temp = new CNode(c,firstC);
+			firstC = temp;
+		}
+		
+		else{//normal case
+			CNode tempNode = getNodeAt(0, offset - 1, firstC);
+			CNode contNode = tempNode.next;
+			CNode temp = new CNode(c,contNode);
+			tempNode.next = temp;
+		}
+		length++;
 		return this;
 	}
 
@@ -303,6 +472,33 @@ public class MyStringBuilder2
 	// invalid, do nothing.
 	public MyStringBuilder2 insert(int offset, char [] c)
 	{
+		if(offset<0||offset>length){
+			return this;
+		}
+		
+		else if(offset == length){//just the append case
+			appendCharArray(c, 0, lastC);
+		}
+		
+		else if(offset == 0){//put at front
+			int lHolder = length;
+			CNode tempNode = firstC;
+			CNode tempNode2 = lastC;
+			makeBuilderCharArray(c, 0);
+			lastC.next = tempNode;
+			lastC = tempNode2;
+			length = lHolder;
+		}
+		
+		else{//normal case
+			CNode lastHolder = lastC;
+			CNode tempNode = getNodeAt(0, offset - 1, firstC);
+			CNode contNode = tempNode.next;
+			appendCharArray(c, 0, tempNode);
+			lastC.next = contNode;
+			lastC = lastHolder;
+		}
+		length+=c.length;
 		return this;
 	}
 
@@ -311,7 +507,6 @@ public class MyStringBuilder2
 	{
 		return length;
 	}
-
 
 	// Delete the substring from "start" to "end" - 1 in the current
 	// MyStringBuilder, then insert String "str" into the current
@@ -345,6 +540,17 @@ public class MyStringBuilder2
 		{
 			c[pos] = curr.data;
             getString(c, pos+1, curr.next);
+		}
+	}
+	
+	private CNode getNodeAt(int s, int index, CNode node){
+		if (s == index)
+		{
+			return node;
+		}
+		else
+		{
+			return getNodeAt(s + 1,index,node.next);
 		}
 	}
 
