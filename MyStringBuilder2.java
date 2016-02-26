@@ -516,14 +516,69 @@ public class MyStringBuilder2
 	// end of the MyStringBuilder, then insert.
 	public MyStringBuilder2 replace(int start, int end, String str)
 	{
+		if(start<0||start>length){//special case
+			return this;
+		}
+		else if(start>=end){//special case
+			return this;
+		}
+		else if(start == 0 && end>= length){
+			makeBuilderString(str,0);
+		}
+		else if(start > 0 && end>= length){
+			CNode temp = getNodeAt(0, start-1, firstC);
+			appendString(str, 0, temp);
+			length = start + str.length();
+		}
+		else{//normal case
+			CNode front = firstC;
+			replaceR(0, start, end, front, firstC, lastC, str);
+			length = length-end+start+str.length();
+		}
 		return this;
+	}
+	
+	private void replaceR(int s, int start, int end, CNode front, CNode node, CNode nodeL, String str){
+		if(s != start - 1 && s != end)
+		{
+			replaceR(s + 1, start, end, front, node.next, nodeL, str);
+		}
+		else if (s == start - 1)
+		{
+			front = node;
+			replaceR(s + 1, start, end, front, node.next, nodeL, str);
+		}
+		else
+		{
+			appendString(str, 0, front);
+			lastC.next = node;
+			lastC = nodeL;
+		}
 	}
 
 	// Return as a String the substring of characters from index "start" to
 	// index "end" - 1 within the current MyStringBuilder
-	public String substring(int start, int end)
+	public String substring(int start, int end)										//**********LEGAL?
 	{
-		return "this";
+		if (firstC == null) {//special case					 			  
+			return ("");
+		}
+		else{// normal case
+			char[] build = new char[end-start];
+			CNode temp = getNodeAt(0, start, firstC);
+			substringR(0,end-start,temp, build);
+			
+			
+			return new String(build);
+		}
+	}
+	
+	private void substringR(int s, int end, CNode node, char [] b){
+		if(s!=end)
+		{
+			b[s] = node.data;
+			substringR(s+1, end, node.next, b);
+		}
 	}
 
 	// Return the entire contents of the current MyStringBuilder as a String
