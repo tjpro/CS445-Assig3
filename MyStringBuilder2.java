@@ -229,7 +229,7 @@ public class MyStringBuilder2
 		if (c == '\u0000'){//checks if char is 	empty				 			  
 			return this;
 		}
-		else		//****************************LEGAL?
+		else		
 		{
 			if(this.firstC == null){
 				this.firstC = new CNode(c);
@@ -245,27 +245,6 @@ public class MyStringBuilder2
 		length++;
 		return this;
 	}
-	
-	/*																				Not finished, but not needed for now
-	private void appendChar(CNode front, CNode end){
-		// Recursive case – we have not finished going through the String
-		if (front != null)
-		{
-			CNode temp = new CNode(front.data);
-			end.next = temp;
-            appendMSB(front.next, temp);
-		}
-		else																	
-		{
-			CNode currNode = lastC;
-			CNode newNode = new CNode(c);
-			currNode.next = newNode;
-			currNode = newNode;
-			length++;
-			lastC = currNode;	
-		}
-	}
-	*/
 
 	// Return the character at location "index" in the current MyStringBuilder.
 	// If index is invalid, throw an IndexOutOfBoundsException.
@@ -579,7 +558,7 @@ public class MyStringBuilder2
 
 	// Return as a String the substring of characters from index "start" to
 	// index "end" - 1 within the current MyStringBuilder
-	public String substring(int start, int end)										//**********LEGAL?
+	public String substring(int start, int end)	
 	{
 		if (firstC == null) {//special case					 			  
 			return ("");
@@ -601,7 +580,42 @@ public class MyStringBuilder2
 			substringR(s+1, end, node.next, b);
 		}
 	}
-
+	
+	
+	//EXTRA CREDIT
+	public MyStringBuilder2 reverse(MyStringBuilder2 b){
+		b.lastC = reverseR(b.firstC, b);
+		b.lastC.next = null;
+		return(b);
+	}
+	
+	private CNode reverseR(CNode node, MyStringBuilder2 b){
+		CNode temp = null;
+		if(node.next != null)
+		{
+			temp = reverseR(node.next, b);
+			temp.next = node;
+			return node;
+		}
+		else{
+			b.firstC = node;
+			return node;
+		}
+	}
+	
+	/*
+	THIS IS AN EXAMPLE OF CODE TO TEST THE REVERSE METHOD.
+	
+	b1.reverse(b1);
+	System.out.println(b1);
+		
+	b1.reverse(b1);
+	System.out.println(b1);
+	*/
+	
+	//END EXTRA CREDIT
+	
+	
 	// Return the entire contents of the current MyStringBuilder as a String
 	public String toString()
 	{
